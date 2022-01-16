@@ -3,83 +3,42 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+import 'classes/settings.dart';
+import 'components/rangeslider.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const GbMonUi());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class GbMonUi extends StatelessWidget {
+  const GbMonUi({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
+      theme: ThemeData.dark().copyWith(
+        primaryColor: Colors.grey[900],
+        scaffoldBackgroundColor: Colors.grey[900],
+        textTheme: TextTheme(
+          headline6: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'Gigabyte Monitor UI'),
+      home: const HomePage(title: 'Gigabyte Monitor UI'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class Settings {
-  final int contrast;
-  final int brightness;
-  final int gamma;
-  final int black_equalizer;
-  final int color_vibrance;
-  final int color_temperature;
-  final int sharpness;
-  final int low_blue_light;
-  final int super_resolution;
-  final int overdrive;
-
-  factory Settings.fromJson(Map<String, dynamic> data) {
-    final contrast = data['contrast'] as int;
-    final brightness = data['brightness'] as int;
-    final gamma = data['gamma'] as int;
-    final black_equalizer = data['black_equalizer'] as int;
-    final color_vibrance = data['color_vibrance'] as int;
-    final color_temperature = data['color_temperature'] as int;
-    final sharpness = data['sharpness'] as int;
-    final low_blue_light = data['low_blue_light'] as int;
-    final super_resolution = data['super_resolution'] as int;
-    final overdrive = data['overdrive'] as int;
-
-    return Settings(
-        contrast,
-        brightness,
-        gamma,
-        black_equalizer,
-        color_vibrance,
-        color_temperature,
-        sharpness,
-        low_blue_light,
-        super_resolution,
-        overdrive);
-  }
-
-  Settings(
-      this.contrast,
-      this.brightness,
-      this.gamma,
-      this.black_equalizer,
-      this.color_vibrance,
-      this.color_temperature,
-      this.sharpness,
-      this.low_blue_light,
-      this.super_resolution,
-      this.overdrive);
+  State<HomePage> createState() => _HomePageState();
 }
 
 Future<Settings> getSettings() async {
@@ -89,7 +48,7 @@ Future<Settings> getSettings() async {
   return settings;
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
   final Future<Settings> _settings = getSettings();
   bool initialized = false;
 
@@ -114,53 +73,53 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      RangeSlider(
+                      ValueSlider(
                         initialValue: snapshot.data!.brightness.toDouble(),
                         label: "Brightness",
                         flag: "-b",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         initialValue: snapshot.data!.contrast.toDouble(),
                         label: "Red",
                         flag: "--red",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         initialValue: 100,
                         label: "Green",
                         flag: "--green",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         initialValue: 100,
                         label: "Blue",
                         flag: "--blue",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         initialValue: 50,
                         label: "Contrast",
                         flag: "-c",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 20,
                         initialValue: snapshot.data!.black_equalizer.toDouble(),
                         label: "Black Equalizer",
                         flag: "-e",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 20,
                         initialValue: snapshot.data!.color_vibrance.toDouble(),
                         label: "Vibrance",
                         flag: "--color-vibrance",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 10,
                         initialValue: snapshot.data!.sharpness.toDouble(),
                         label: "Sharpness",
                         flag: "--sharpness",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 4,
                         initialValue:
@@ -168,14 +127,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         label: "Super Resolution",
                         flag: "--super-resolution",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 5,
                         initialValue: snapshot.data!.gamma.toDouble(),
                         label: "Gamma",
                         flag: "--gamma",
                       ),
-                      RangeSlider(
+                      ValueSlider(
                         min: 0,
                         max: 10,
                         initialValue: snapshot.data!.low_blue_light.toDouble(),
@@ -189,79 +148,5 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Center(child: Text("data"));
               }
             }));
-  }
-}
-
-class RangeSlider extends StatefulWidget {
-  final double initialValue;
-  final double min;
-  final double max;
-  final String label;
-  final String flag;
-
-  RangeSlider(
-      {Key? key,
-      this.initialValue = 0,
-      this.label = "Val",
-      this.flag = "-b",
-      this.min = 0,
-      this.max = 100})
-      : super(key: key);
-
-  @override
-  _RangeSliderState createState() => _RangeSliderState();
-}
-
-class _RangeSliderState extends State<RangeSlider> {
-  double _sliderValue = 0;
-
-  void initState() {
-    super.initState();
-    _sliderValue = widget.initialValue;
-  }
-
-  void sendCommandToMonitor(String flag, String value) {
-    Process.run('gbmoncli', [flag, value]).then((ProcessResult results) {
-      print(results.stdout);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          children: [
-            Text(
-              widget.label,
-            ),
-            TextButton(
-              onPressed: () {
-                sendCommandToMonitor(
-                    widget.flag, "${widget.initialValue.round()}");
-                setState(() {
-                  _sliderValue = widget.initialValue;
-                });
-              },
-              child: const Text('Reset'),
-            ),
-          ],
-        ),
-        Slider(
-          value: _sliderValue,
-          divisions: widget.min == 0 ? widget.max.round() : null,
-          max: widget.max,
-          min: widget.min,
-          label: _sliderValue.round().toString(),
-          onChanged: (double value) {
-            sendCommandToMonitor(widget.flag, "${value.round()}");
-            setState(() {
-              _sliderValue = value;
-            });
-          },
-        ),
-      ],
-    );
   }
 }
